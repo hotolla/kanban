@@ -21,7 +21,7 @@ gulp.task("server", function () {
 
 gulp.task("styles", function () {
   return gulp
-    .src("src/scss/**/*.scss")
+    .src("./src/style.scss")
     .pipe(scss({ outputStyle: "compressed" }).on("error", scss.logError))
     .pipe(
       rename({
@@ -35,7 +35,7 @@ gulp.task("styles", function () {
         compatibility: "ie8",
       })
     )
-    .pipe(gulp.dest("dist/css"))
+    .pipe(gulp.dest("./dist/css"))
     .pipe(browserSync.stream());
 });
 
@@ -64,7 +64,7 @@ gulp.task("icons", function () {
 });
 
 gulp.task("watch", function () {
-  gulp.watch("src/scss/**/*.scss", gulp.parallel("styles"));
+  gulp.watch("src/**/*.scss", gulp.parallel("styles"));
   gulp.watch("src/**/*.html").on("change", gulp.parallel("html"));
   gulp.watch("src/js/**/*.js", gulp.parallel("scripts"));
   gulp.watch("src/img/**/*", gulp.parallel("images"));

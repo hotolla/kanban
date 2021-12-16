@@ -14,7 +14,7 @@ const lists = [
 
 const cardToHtml = (card) => {
   return `
-    <div class="card" data-card=${card.id}>
+    <div class="card" draggable="true" data-card=${card.id}>
       <div class="card__name" data-card-name> 
         ${card.name}
       </div>
@@ -32,28 +32,39 @@ const cardToHtml = (card) => {
   `;
 };
 
-const dataToHtml = (lists) => {
-  return lists.map((list) => {
-    const cards = list.cards.map(cardToHtml);
-    console.log(cards);
+const listToHtml = (list) => {
+  const cards = list.cards?.map(cardToHtml);
+  console.log(cards);
 
-    return `
-        <div class="list" data-list=${list.id}>
-          <div class="cards" data-cards>
-            ${cards}
-          </div>
+  return `
+    <div class="list" data-list=${list.id}>
+      <div class="list__name" data-list-name>
+        ${list.name}
+      </div>
+      <button data-delete-list>&times;</button>
+      <div class="cards" data-cards>
+        ${cards || ""}
+      </div>
 
-          <button data-add-card>Добавить еще одну карточку</button>
-        </div>
-      `;
-  });
+      <button class="btn__add" data-add-card>Добавить еще одну карточку</button>
+    </div>
+  `;
 };
+
+const dataToHtml = (lists) => {
+  return lists.map(listToHtml);
+};
+
 document.addEventListener("click", (event) => {
   const addCardButtonEl = event.target.closest("[data-add-card]");
-  const editButtonEl = event.target.closest("[data-card-edit]");
-  const deleteButtonEl = event.target.closest("[data-card-delete]");
+  const editCardButtonEl = event.target.closest("[data-card-edit]");
+  const deleteCardButtonEl = event.target.closest("[data-card-delete]");
+  const addListButtonEl = event.target.closest("[data-add-list]");
+  const editListButtonEl = event.target.closest("[data-list-name]");
+  const deleteListButtonEl = event.target.closest("[data-delete-list]");
 
-  //почитать closest
+  console.log(editListButtonEl, event.target);
+
   if (addCardButtonEl) {
     const cardName = prompt("Введите название карточки");
     const cardsEl = addCardButtonEl
@@ -69,8 +80,20 @@ document.addEventListener("click", (event) => {
     );
   }
 
-  if (editButtonEl) {
-    const cardEl = editButtonEl.closest("[data-card]");
+  if (addListButtonEl) {
+    const listName = prompt("Введите название колонки");
+
+    boardEl.insertAdjacentHTML(
+      "beforeend",
+      listToHtml({
+        id: Date.now(),
+        name: listName,
+      })
+    );
+  }
+
+  if (editCardButtonEl) {
+    const cardEl = editCardButtonEl.closest("[data-card]");
     const cardNameEl = cardEl.querySelector("[data-card-name]");
 
     cardNameEl.textContent = prompt(
@@ -79,31 +102,82 @@ document.addEventListener("click", (event) => {
     );
   }
 
-  if (deleteButtonEl) {
+  if (deleteCardButtonEl) {
     if (confirm("Вы действительно хотите удалить?")) {
-      deleteButtonEl.closest("[data-card]").remove();
+      deleteCardButtonEl.closest("[data-card]").remove();
     }
+  }
+
+  if (deleteListButtonEl) {
+    if (confirm("Вы действительно хотите удалить?")) {
+      deleteListButtonEl.closest("[data-list]").remove();
+    }
+  }
+
+  if (editListButtonEl) {
+    editListButtonEl.textContent = prompt(
+      "Редактировать",
+      editListButtonEl.textContent.trim()
+    );
+  }
+});
+
+let draggableCardEl = null;
+let currentDropzoneEl = null;
+
+document.addEventListener("dragstart", (event) => {
+  const cardEl = event.target.closest("[data-card]");
+
+  if (cardEl) {
+    draggableCardEl = cardEl;
+    cardEl.style.opacity = "0.5";
+  }
+});
+
+document.addEventListener("dragend", (event) => {
+  const cardEl = event.target.closest("[data-card]");
+
+  if (cardEl) {
+    cardEl.style.opacity = "1";
+  }
+});
+
+document.addEventListener("dragover", (event) => {
+  event.preventDefault();
+});
+
+document.addEventListener("drop", (event) => {
+  event.stopPropagation();
+
+  const listEl = event.target.closest("[data-list]");
+
+  if (listEl) {
+    const cardsEl = listEl.querySelector("[data-cards]");
+
+    draggableCardEl.style.opacity = "1";
+    cardsEl.append(draggableCardEl.cloneNode(true));
+    draggableCardEl.remove();
+  }
+});
+
+document.addEventListener("dragenter", (event) => {
+  const cardsEl = event.target.closest("[data-cards]");
+
+  if (cardsEl) {
+    currentDropzoneEl = cardsEl;
+    cardsEl.style.background = "#ccc";
+  }
+
+  console.log(cardsEl, event.target);
+});
+
+document.addEventListener("dragleave", (event) => {
+  const cardsEl = event.target.closest("[data-cards]");
+
+  if (cardsEl && currentDropzoneEl) {
+    currentDropzoneEl = null;
+    cardsEl.style.background = "";
   }
 });
 
 boardEl.innerHTML = dataToHtml(lists);
-
-function map(arr, callback) {
-  const result = [];
-  for (let i = 0; i < arr.length; i++) {
-    // Передали элемент массива
-    const callbackResult = callback(arr[i]);
-
-    result.push(callbackResult);
-  }
-
-  return result; // возврат, если ничего не делали = нет return то вернет undefined
-}
-
-const result = map([2, 3], (item) => {
-  return item * 2;
-});
-console.log(result);
-
-const result2 = map;
-console.log(result2);
