@@ -1,0 +1,36 @@
+.btn__add {
+  background: #dfe3e6;
+  border-radius: 3px;
+  border: none;
+  width: 272px;
+  color: #6b808c;
+  padding: 12px 35px;
+  position: relative;
+  &::after {
+    content: "";
+    background: url(../../icons/btnPlus.svg) no-repeat;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    top: 66%;
+    left: 6%;
+    transform: translateY(-50%);
+  }
+  &:hover {
+    background: #bdcde7;
+  }
+}
+
+.btn__delete {
+  border: none;
+  background: none;
+  &:hover {
+    background: #bdcde7;
+  }
+}
+
+.list__btn {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+}
